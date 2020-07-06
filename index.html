@@ -669,7 +669,28 @@ h1{
 
         <p><h1>JSOC 2020 Road towards a standard compliant Interval Arithmetic Julia Library</h1></p>
 <p>Solving some bugs with the help of ITF1788 Test Suite to make the package a little more close to perfect is what I am working on this summer. From &quot;I can&#39;t solve this error, I have no idea about it&quot; to &quot;Hurrah&#33;, I have finally solved it&quot; it has really been an enriching experience for me. The way I have approached my endeavour is by taking every new error as a challenge and no matter how many hours&#40;or days&#41; it may take, it has to be solved.</p>
-<p>The ITF1788 test suite is really awesome, it finds even the smallest inaccuracy in the source code and absolutely nothing goes unchecked by it.</p>
+<p><h4> Brief Background</h4></p>
+<p>The main focus of interval arithmetic is a simple way to calculate upper and lower endpoints for the range of values of a function in one or more variables. These endpoints are not necessarily the supremum or infimum, since the precise calculation of those values can be difficult or impossible.
+Treatment is typically limited to real intervals, so quantities of form</p>
+<img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/51f04b988e5d5eff0dfc0dc310b0b7d45f4e6de6" alt=1>
+<p>where <img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/26fa49f17ce99c4371f35a89a278548404d6e991" alt=infinity> and <img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/132f0722c34bb2545b0a0bfc6132f611f05b61f9" alt=-infinity> are allowed;</p>
+<p><a href="https://github.com/oheim/ITF1788">ITF1788</a> stands for Interval Testframework for IEEE 1788, these tests are also written in Julia, and my job is to check what test is not passing in <a href="https://github.com/JuliaIntervals/IntervalArithmetic.jl">IntervalArithmetic.jl</a> + <a href = "https://github.com/JuliaIntervals/IntervalContractors.jl">IntervalContractors.jl</a> and satisfy them
+Since a part of my work this month was on decorations and reverse functions, it is good you know about them before reading the main part of the blog.</p>
+<h4>Decorations</h4>
+<p>Decorations are flags, or labels, attached to intervals to indicate the status of a given interval as the result of evaluating a function on an initial interval. The combination of an interval XX and a decoration dd is called a decorated interval.
+The allowed decorations and their ordering are as follows: com > dac > def > trv > ill.
+Suppose that a decorated interval (X,d) is the result of evaluating a function ff, or the composition of a sequence of functions, on an initial decorated interval (X0,d0). The meaning of the resulting decoration dd is as follows:</p>
+<ul>
+	<li>	com ("common"): X is a closed, bounded, nonempty subset of the domain of f; f is continuous on the interval X; and the resulting interval f(X) is bounded.</l1>
+	<li>	dac ("defined & continuous"): X is a nonempty subset of Dom(f), and f is continuous on X.</li>
+	<li>	def ("defined"): X is a nonempty subset of Dom(f), i.e. f is defined at each point of X.</li>
+	<li>	def ("defined"): X is a nonempty subset of Dom(f), i.e. f is defined at each point of X.</li>
+	<li>	ill ("ill-formed"): Not an Interval (an error occurred)</li>
+</ul>
+<h4>Reverse Functions</h4>
+<p>The reverse function of a function f calculates the (interval hull of) its inverse function, f⁻¹.
+For example, sin_rev(Y::Interval, X::Interval) calculates the (interval hull of) those x ∈ X such that sin(x) ∈ Y. This can also be thought of as an inverse function, calculating X_new := sin⁻¹(Y) ∩ X. The return value is (Y, X_new).
+Functions such as mul_rev(C::Interval, A::Interval, B::Interval) take three arguments, and correspond to C = A * B; they return (C, A_new, B_new), with A_new and B_new similarly defined to be the corresponding inverse images of the multiplication operator in each component.</p>
 <p>I will be mentioning some bugs which have been solved and also some new functions that have been implemented during this first month of my JSOC period.</p>
 <p><h4>Libieeep1788testsrev.jl </h4>I decided to start with the biggest file in the suite which is libieeep1788<em>tests</em>rev.jl and the first thing I needed to do was add decorations for all the reverse functions in IntervalContractors.jl</p>
 <p><h4>Add decorations for reverse functions</h4></p>
@@ -701,7 +722,7 @@ h1{
 <p>Apart from the above points, a default value was added to each of this functions which was required by the tests This completed libieeep1788<em>tests</em>rev.jl and I remember I rewarded myself with 2 hours of extra sleep the day I completed this.</p>
 <p>All of the above points have been incorporated in one PR&#40;<a href="https://github.com/JuliaIntervals/IntervalContractors.jl/pull/43">#25</a>&#41; which is ready to be merged, just awating a final review from my mentor.</p>
 <p><h4>Ieee1788-constructors.jl</h4>Next file to be solved was ieee1788-constructors.jl&#40;and no, it is not the 2nd biggest file&#41; </p>
-<p><h4>Making nai&#40;&#41;a decorated interval</h4>According to the standard and the tests&#40;obviously&#41;, <code>nai&#40;&#41;</code> should be a decorated interval, there was also an open issue&#40;<a href="https://github.com/JuliaIntervals/IntervalArithmetic.jl/issues/233">#233</a>&#41; regarding this. Now,</p>
+<p><h4>Making nai&#40;&#41; a decorated interval</h4>According to the standard and the tests&#40;obviously&#41;, <code>nai&#40;&#41;</code> should be a decorated interval, there was also an open issue&#40;<a href="https://github.com/JuliaIntervals/IntervalArithmetic.jl/issues/233">#233</a>&#41; regarding this. Now,</p>
 
 
 <pre class='hljl'>
